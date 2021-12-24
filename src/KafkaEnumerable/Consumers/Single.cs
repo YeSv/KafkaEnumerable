@@ -28,18 +28,18 @@ namespace KafkaEnumerable.Consumers.Single
         readonly object? _data;
 
         public SingleMessage(ConsumeResult<TKey, TValue>? result) => _data = result;
-        public SingleMessage(KafkaException error) => _data = error;
+        public SingleMessage(ConsumeException error) => _data = error;
 
         public bool HasData => _data is not null;
-        public bool IsError => _data is not null and KafkaException;
+        public bool IsError => _data is not null and ConsumeException;
 
-        public KafkaException? Error => _data as KafkaException;
+        public ConsumeException? Error => _data as ConsumeException;
         public ConsumeResult<TKey, TValue>? ConsumeResult => _data as ConsumeResult<TKey, TValue>;
 
-        public void Deconstruct(out ConsumeResult<TKey, TValue>? result, out KafkaException? error)
+        public void Deconstruct(out ConsumeResult<TKey, TValue>? result, out ConsumeException? error)
         {
             result = _data as ConsumeResult<TKey, TValue>;
-            error = _data as KafkaException;
+            error = _data as ConsumeException;
         }
     }
 
@@ -65,7 +65,7 @@ namespace KafkaEnumerable.Consumers.Single
             {
                 return new(consumer.Consume(timeout));
             }
-            catch (KafkaException ex)
+            catch (ConsumeException ex)
             {
                 return new(ex);
             }

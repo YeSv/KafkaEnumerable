@@ -7,6 +7,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A8F0D760-533
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KafkaEnumerable", "src\KafkaEnumerable\KafkaEnumerable.csproj", "{508BDF08-C00E-44B5-8A69-2B50D676AB37}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{C896FBD8-E051-4F4D-A2A1-10BC8DD0585D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KafkaEnumerable.UnitTests", "tests\KafkaEnumerable.UnitTests\KafkaEnumerable.UnitTests.csproj", "{3DDABE5A-FD61-4B7E-A3AE-CFE7B75B8951}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,12 +21,17 @@ Global
 		{508BDF08-C00E-44B5-8A69-2B50D676AB37}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{508BDF08-C00E-44B5-8A69-2B50D676AB37}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{508BDF08-C00E-44B5-8A69-2B50D676AB37}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3DDABE5A-FD61-4B7E-A3AE-CFE7B75B8951}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3DDABE5A-FD61-4B7E-A3AE-CFE7B75B8951}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3DDABE5A-FD61-4B7E-A3AE-CFE7B75B8951}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3DDABE5A-FD61-4B7E-A3AE-CFE7B75B8951}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{508BDF08-C00E-44B5-8A69-2B50D676AB37} = {A8F0D760-533D-4480-BBB6-96BCB8886F87}
+		{3DDABE5A-FD61-4B7E-A3AE-CFE7B75B8951} = {C896FBD8-E051-4F4D-A2A1-10BC8DD0585D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4EA2E3E9-2888-4194-A0E8-F299581B0AC4}

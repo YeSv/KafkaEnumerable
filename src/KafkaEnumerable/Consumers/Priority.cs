@@ -19,7 +19,7 @@ namespace KafkaEnumerable.Consumers.Priority
             ReturnNulls = returnNulls ?? Defaults.ReturnNulls;
             ConsumeTimeout = consumeTimeout ?? Defaults.ConsumeTimeout;
             FlushInterval = flushInterval ?? Defaults.FlushInterval;
-            Thresholds = thresholds ?? Enumerable.Repeat(Defaults.MessagesThreshold, consumersNum).ToArray();
+            Thresholds = thresholds ?? Enumerable.Repeat(Defaults.Infinity, 1).Concat(Enumerable.Repeat(Defaults.MessagesThreshold, consumersNum - 1)).ToArray();
         }
     }
 
@@ -27,10 +27,11 @@ namespace KafkaEnumerable.Consumers.Priority
     {
         DateTime _nextFlush;
 
-        public int ConsumerIndex { get; set; }
+        public int Priority { get; set; }
         public ConsumeOptions Options { get; set; }
         public CancellationToken Token { get; set; }
         public int[] CurrentThresholds { get; set; }
+        public bool ShouldCheckPriorities { get; set; }
 
         public ConsumerState(ConsumeOptions options, CancellationToken token)
         {
@@ -62,7 +63,7 @@ namespace KafkaEnumerable.Consumers.Priority
 
         public PriorityMessage(
             IConsumer<TKey, TValue> consumer, 
-            KafkaException error, 
+            ConsumeException error, 
             bool isFlush,
             int priority) => (Consumer, _data, IsFlush, Priority) = (consumer, error, isFlush, priority);
 
@@ -71,9 +72,9 @@ namespace KafkaEnumerable.Consumers.Priority
         public IConsumer<TKey, TValue> Consumer { get; }
 
         public bool HasData => _data is not null;
-        public bool IsError => _data is not null and KafkaException;
+        public bool IsError => _data is not null and ConsumeException;
 
-        public KafkaException? Error => _data as KafkaException;
+        public ConsumeException? Error => _data as ConsumeException;
         public ConsumeResult<TKey, TValue>? ConsumeResult => _data as ConsumeResult<TKey, TValue>;
     }
 
@@ -87,25 +88,28 @@ namespace KafkaEnumerable.Consumers.Priority
             while (true)
             {
                 if (state.ShouldFlush()) goto Flush; // We need to flush due to timeout
-                if (state.CurrentThresholds[state.ConsumerIndex] == 0) // Current priority threshold is reached, reset threshold and update priority
+                if (state.ShouldCheckPriorities) goto UpdatePriority; // If we need to check priorities - jump
+
+                var message = Consume(consumers[state.Priority], state.Options.ConsumeTimeout, false, state.Priority, state.Token);
+                if (state.CurrentThresholds[state.Priority] != Defaults.Infinity) state.CurrentThresholds[state.Priority]--; // Update current threshold
+                if (state.CurrentThresholds[state.Priority] == 0 || !message.HasData) // Current priority threshold is reached or no meaningful data - reset threshold and try to move to next priority
                 {
-                    state.CurrentThresholds[state.ConsumerIndex] = state.Options.Thresholds![state.ConsumerIndex];
-                    goto UpdatePriority;
+                    state.ShouldCheckPriorities = true;
+                    state.CurrentThresholds[state.Priority] = state.Options.Thresholds[state.Priority];
                 }
-                
-                var message = Consume(consumers[state.ConsumerIndex], state.Options.ConsumeTimeout, false, state.ConsumerIndex, state.Token);
-                if (state.CurrentThresholds[state.ConsumerIndex] != Defaults.Infinity) state.CurrentThresholds[state.ConsumerIndex]--; // Update current threshold
                 if (state.Options.ReturnNulls || message.HasData) yield return message; // Yield message only if it has meaningful data or returnNulls is enabled
-                if (message.HasData) continue; // HasData - no need to update priority
+                continue;
+
 
             UpdatePriority:
-                if (++state.ConsumerIndex >= consumers.Length) state.ConsumerIndex = 0;
-                for (var i = 0; i < consumers.Length; i++)
+                state.ShouldCheckPriorities = false;
+                if (++state.Priority >= consumers.Length) state.Priority = 0;
+                for (var i = 0; i < state.Priority; i++) // Check priorities before current
                 {
                     var prevMessage = Consume(consumers[i], state.Options.ConsumeTimeout, false, i, state.Token);
                     if (prevMessage.HasData) // Just check here if previous priority has data (returnNulls is ignored here)
                     {
-                        state.ConsumerIndex = i; // We can jump to previous priority because consumer returned meaningful data
+                        state.Priority = i; // We can jump to previous priority because consumer returned meaningful data
                         yield return prevMessage; 
                         break;
                     }
@@ -134,7 +138,7 @@ namespace KafkaEnumerable.Consumers.Priority
             {
                 return new(consumer, consumer.Consume(timeout), isFlush, priority);
             }
-            catch (KafkaException ex)
+            catch (ConsumeException ex)
             {
                 return new(consumer, ex, isFlush, priority);
             }
