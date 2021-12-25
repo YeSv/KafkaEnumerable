@@ -10,6 +10,7 @@ public sealed class InMemoryConsumer<TKey, TValue> : IConsumer<TKey, TValue>
 {
     private int _partitionIndex = 0;
 
+    readonly bool _sleep;
     readonly string _topic;
     readonly int[] _partitions;
     readonly Func<TValue, TKey> _keyMapper;
@@ -20,9 +21,11 @@ public sealed class InMemoryConsumer<TKey, TValue> : IConsumer<TKey, TValue>
     public InMemoryConsumer(
         string topic,
         Func<TValue, TKey> keyMapper,
-        Dictionary<int, TValue[]> messagesPerPartition)
+        Dictionary<int, TValue[]> messagesPerPartition,
+        bool sleep = false)
     {
         _topic = topic;
+        _sleep = sleep;
         _keyMapper = keyMapper;
         _messagesPerPartiton = messagesPerPartition;
         _partitions = messagesPerPartition.Keys.ToArray();
@@ -65,9 +68,19 @@ public sealed class InMemoryConsumer<TKey, TValue> : IConsumer<TKey, TValue>
         };
     }
 
-    public ConsumeResult<TKey, TValue> Consume(TimeSpan timeout) => Consume(default(CancellationToken));
+    public ConsumeResult<TKey, TValue> Consume(TimeSpan timeout)
+    {
+        var result = Consume(default(CancellationToken));
+        if (result == null && _sleep) Thread.Sleep(timeout);
+        return result!;
+    }
 
-    public ConsumeResult<TKey, TValue> Consume(int millisecondsTimeout) => Consume(default(CancellationToken));
+    public ConsumeResult<TKey, TValue> Consume(int millisecondsTimeout) 
+    {
+        var result = Consume(default(CancellationToken));
+        if (result == null && _sleep) Thread.Sleep(millisecondsTimeout);
+        return result!;
+    }
 
     #region Not Implemented
 

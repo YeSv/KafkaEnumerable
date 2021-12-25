@@ -10,8 +10,8 @@
 	  <Version>1.0.0</Version>
 	  <Description>Kafka enumerable extensions</Description>
 	  <PackageTags>kafka, enumerable</PackageTags>
-	  <PackageProjectUrl>https://github.com/YeSv/Dotnet.KafkaEnumerable</PackageProjectUrl>
-	  <RepositoryUrl>https://github.com/YeSv/Dotnet.KafkaEnumerable</RepositoryUrl>
+	  <PackageProjectUrl>https://github.com/YeSv/KafkaEnumerable</PackageProjectUrl>
+	  <RepositoryUrl>https://github.com/YeSv/KafkaEnumerable</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
