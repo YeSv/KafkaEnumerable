@@ -26,7 +26,7 @@ public class ThresholdsTests
                 [0] = Enumerable.Range(0, 100).Select(_ => Array.Empty<byte>()).ToArray()
             })).ToArray();
 
-        var stream = KafkaEnumerable.Multiple(consumers, thresholds: new[] { 100, 100, 100 }, cancellationToken: cts.Token);
+        var stream = KafkaEnumerables.Multiple(consumers, thresholds: new[] { 100, 100, 100 }, cancellationToken: cts.Token);
 
         stream.Take(100).All(m => m.Consumer == consumers[0] && m.HasData).Should().BeTrue();
         stream.Take(100).All(m => m.Consumer == consumers[1] && m.HasData).Should().BeTrue();
@@ -47,7 +47,7 @@ public class ThresholdsTests
                 [0] = Enumerable.Range(0, 100).Select(_ => Array.Empty<byte>()).ToArray()
             })).ToArray();
 
-        var stream = KafkaEnumerable.Priority(consumers, thresholds: new[] { 100, 100, 100 }, cancellationToken: cts.Token);
+        var stream = KafkaEnumerables.Priority(consumers, thresholds: new[] { 100, 100, 100 }, cancellationToken: cts.Token);
 
         stream.Take(100).All(m => m.Priority == 0 && m.HasData).Should().BeTrue();
         stream.First().ConsumeResult!.IsPartitionEOF.Should().BeTrue();
@@ -69,7 +69,7 @@ public class ThresholdsTests
                 [0] = Enumerable.Range(0, 100).Select(_ => Array.Empty<byte>()).ToArray()
             })).ToArray();
 
-        var stream = KafkaEnumerable.Multiple(consumers, thresholds: new[] { 50, 50, 50 }, cancellationToken: cts.Token);
+        var stream = KafkaEnumerables.Multiple(consumers, thresholds: new[] { 50, 50, 50 }, cancellationToken: cts.Token);
 
         stream.Take(50).All(m => m.Consumer == consumers[0] && m.HasData).Should().BeTrue();
         stream.Take(50).All(m => m.Consumer == consumers[1] && m.HasData).Should().BeTrue();
@@ -96,7 +96,7 @@ public class ThresholdsTests
                 [0] = messages.Concat(@break).Concat(messages).Concat(messages).ToArray()
             })).ToArray();
 
-        var stream = KafkaEnumerable.Multiple(consumers, thresholds: new[] { 100, 100, 100 }, cancellationToken: cts.Token);
+        var stream = KafkaEnumerables.Multiple(consumers, thresholds: new[] { 100, 100, 100 }, cancellationToken: cts.Token);
 
         stream.Take(50).All(m => m.Consumer == consumers[0] && m.HasData).Should().BeTrue();
         stream.Take(50).All(m => m.Consumer == consumers[1] && m.HasData).Should().BeTrue();
@@ -119,7 +119,7 @@ public class ThresholdsTests
                 [0] = Enumerable.Range(0, 100).Select(_ => Array.Empty<byte>()).ToArray()
             })).ToArray();
 
-        var stream = KafkaEnumerable.Priority(consumers, thresholds: new[] { 50, 50, 50 }, cancellationToken: cts.Token);
+        var stream = KafkaEnumerables.Priority(consumers, thresholds: new[] { 50, 50, 50 }, cancellationToken: cts.Token);
 
         stream.Take(100).All(m => m.Priority == 0 && m.HasData).Should().BeTrue();
         stream.First().ConsumeResult!.IsPartitionEOF.Should().BeTrue();
@@ -144,7 +144,7 @@ public class ThresholdsTests
                 [0] = messages.Concat(@break).Concat(messages).ToArray()
             })).ToArray();
 
-        var stream = KafkaEnumerable.Priority(consumers, thresholds: new[] { 100, 100, 100 }, cancellationToken: cts.Token);
+        var stream = KafkaEnumerables.Priority(consumers, thresholds: new[] { 100, 100, 100 }, cancellationToken: cts.Token);
 
         stream.Take(50).All(m => m.Priority == 0 && m.HasData).Should().BeTrue();
         stream.Take(50).All(m => m.Priority == 1 && m.HasData).Should().BeTrue();

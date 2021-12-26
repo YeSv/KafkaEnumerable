@@ -22,7 +22,7 @@ public class FlushTests
         {
             [0] = Enumerable.Repeat(0, 100).Select(_ => Array.Empty<byte>()).ToArray()
         })).ToArray();
-        var stream = KafkaEnumerable.Multiple(consumers, cancellationToken: cts.Token, flushInterval: TestTimeout.Divide(4), returnNulls: returnNulls);
+        var stream = KafkaEnumerables.Multiple(consumers, cancellationToken: cts.Token, flushInterval: TestTimeout.Divide(4), returnNulls: returnNulls);
 
         _ = stream.First(); // ignore
 
@@ -41,7 +41,7 @@ public class FlushTests
         {
             [0] = Enumerable.Repeat(0, 100).Select(_ => Array.Empty<byte>()).ToArray()
         })).ToArray();
-        var stream = KafkaEnumerable.Priority(consumers, cancellationToken: cts.Token, flushInterval: TestTimeout.Divide(4), returnNulls: returnNulls);
+        var stream = KafkaEnumerables.Priority(consumers, cancellationToken: cts.Token, flushInterval: TestTimeout.Divide(4), returnNulls: returnNulls);
 
         _ = stream.First(); // ignore
 

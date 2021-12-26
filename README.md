@@ -31,7 +31,7 @@ var consumer = new ConsumerBuilder<byte[], byte[]>(...).Build();
 consumer.Subscribe("test-topic1", "test-topic2");
 
 // Create IEnumerable
-var stream = KafkaEnumerable.Single(consumer);
+var stream = KafkaEnumerables.Single(consumer);
 
 foreach (var message in stream) {
    // Do stuff
@@ -62,7 +62,7 @@ var consumers = new[] {
 };
 
 // Create IEnumerable
-var stream = KafkaEnumerable.Multiple(consumers);
+var stream = KafkaEnumerables.Multiple(consumers);
 
 foreach (var message in stream) {
    // Do stuff
@@ -86,7 +86,7 @@ var consumers = new[] {
 // Subscribe (omitted)
 
 // Create IEnumerable
-var stream = KafkaEnumerable.Priority(consumers);
+var stream = KafkaEnumerables.Priority(consumers);
 
 foreach (var message in stream) {
    // Do stuff
@@ -108,7 +108,7 @@ Let's dive deeper in next sections dedicated for each consumer stream directly.
 
 3. `cancellationToken` (`CancellationToken`) - used to `stop` an `Enumerable` instance :D (explained later)
 
-`KafkaEnumerable.Single` returns `IEnumerable<SingleMessage<TKey, TValue>>` type. What is this `SingleMessage`? No worries, it is a `struct` wrapper around `ConsumeResult<TKey, TValue>` or `ConsumeException` - basically it may contain either consume result or an error. It was decided that it's better not to throw exceptions from a stream but rather return them:
+`KafkaEnumerables.Single` returns `IEnumerable<SingleMessage<TKey, TValue>>` type. What is this `SingleMessage`? No worries, it is a `struct` wrapper around `ConsumeResult<TKey, TValue>` or `ConsumeException` - basically it may contain either consume result or an error. It was decided that it's better not to throw exceptions from a stream but rather return them:
 
 ``` csharp
 // Some things are omitted
@@ -151,7 +151,7 @@ var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
 
 // Create a stream
 // NOTE: we are passing cancellation token here
-var stream = KafkaEnumerable.Single(consumer, consumeTimeout: TimeSpan.FromMilliseconds(1), returnNulls: false, cancellationToken: cts.Token);
+var stream = KafkaEnumerables.Single(consumer, consumeTimeout: TimeSpan.FromMilliseconds(1), returnNulls: false, cancellationToken: cts.Token);
 
 // Start consuming from a stream
 // Will throw OperationCancelledException eventually
@@ -252,7 +252,7 @@ var consumer = new ConsumerBuilder<byte[], byte[]>(new ConsumerConfig
    BootstrapServers = "localhost:9092"
 }).Build();
 
-var stream = KafkaEnumerable.Single(consumer, returnNulls: false);
+var stream = KafkaEnumerables.Single(consumer, returnNulls: false);
 
 var batch = stream.Take(100).ToArray(); // Take 100 messages from a consumer
 // or
@@ -263,7 +263,7 @@ var nextMessage = stream.First(); // Take next message
 // Sometimes it is not the desired behavior - we need to gather batches with at most 100 messages for example:
 
 // Wrap consumer in another stream once more (it's completely safe)
-var anotherStream = KafkaEnumerable.Single(consumer, returnNulls: true);
+var anotherStream = KafkaEnumerables.Single(consumer, returnNulls: true);
 
 // This call does not block the thread indefinately because we also returning nulls from kafka (but the whole time depends on consumeTimeout property - better leave it as 1 millisecond)
 // Saying something like: "Please return at most 100 messages, they can be nulls I will filter them out"
@@ -353,7 +353,7 @@ firstConsumer.Subscribe("test-topic");
 secondConsumer.Subscribe("test-topic-dc2");
 
 
-var stream = KafkaEnumerable.Multiple(
+var stream = KafkaEnumerables.Multiple(
    new[] { firstConsumer, secondConsumer },
    consumeTimeout: TimeSpan.FromMilliseconds(1), // Can be omitted
    flushInterval: TimeSpan.FromDays(1000), // To disable flush if needed (by setting a huge interval) (can be ommited)
@@ -463,7 +463,7 @@ secondConsumer.Subscribe("priority-usual");
 
 
 // The only difference is .Priority call :D
-var stream = KafkaEnumerable.Priority(
+var stream = KafkaEnumerables.Priority(
    new[] { firstConsumer, secondConsumer },
    consumeTimeout: TimeSpan.FromMilliseconds(1), // Can be omitted
    flushInterval: TimeSpan.FromDays(1000), // To disable flush if needed (by setting a huge interval) (can be ommited)
