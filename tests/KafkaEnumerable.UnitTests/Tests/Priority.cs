@@ -20,7 +20,7 @@ public class PriorityTests
         {
             [0] = Enumerable.Repeat(0, 100).Select(_ => Array.Empty<byte>()).ToArray()
         })).ToArray();
-        var stream = KafkaEnumerable.Priority(consumers, cancellationToken: cts.Token, thresholds: new[] { 1, 1, 1 });
+        var stream = KafkaEnumerables.Priority(consumers, cancellationToken: cts.Token, thresholds: new[] { 1, 1, 1 });
 
         stream.Take(100).All(m => m.HasData && m.Priority == 0).Should().BeTrue();
         stream.First().ConsumeResult!.IsPartitionEOF.Should().BeTrue();

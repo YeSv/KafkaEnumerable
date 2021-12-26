@@ -6,7 +6,7 @@ using System.Threading;
 
 namespace KafkaEnumerable;
 
-public static class KafkaEnumerable
+public static class KafkaEnumerables
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IEnumerable<Consumers.Single.SingleMessage<TKey, TValue>> Single<TKey, TValue>(

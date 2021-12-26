@@ -21,7 +21,7 @@ public class MultipleTests
             [0] = Enumerable.Repeat(0, 100).Select(_ => Array.Empty<byte>()).ToArray()
         })).ToArray();
         
-        var stream = KafkaEnumerable.Multiple(consumers, cancellationToken: cts.Token, thresholds: new [] { 50, 50, 50 });
+        var stream = KafkaEnumerables.Multiple(consumers, cancellationToken: cts.Token, thresholds: new [] { 50, 50, 50 });
 
         stream.Take(50).All(m => m.HasData && m.Consumer == consumers[0]).Should().BeTrue();
         stream.Take(50).All(m => m.HasData && m.Consumer == consumers[1]).Should().BeTrue();

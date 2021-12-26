@@ -19,7 +19,7 @@ public class SingleTests
             [1] = Enumerable.Range(0, 100).Select(v => Array.Empty<byte>()).ToArray()
         });
 
-        var stream = KafkaEnumerable.Single(consumer);
+        var stream = KafkaEnumerables.Single(consumer);
 
         stream.Take(100).All(m => m.HasData && m.ConsumeResult!.Partition == 0).Should().BeTrue();
         stream.First().ConsumeResult!.IsPartitionEOF.Should().BeTrue();

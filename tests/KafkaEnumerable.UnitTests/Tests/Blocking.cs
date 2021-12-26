@@ -21,7 +21,7 @@ public class BlockingTests
             [0] = new byte[0][]
         });
 
-        var stream = KafkaEnumerable.Single(consumer, cancellationToken: cts.Token);
+        var stream = KafkaEnumerables.Single(consumer, cancellationToken: cts.Token);
 
         stream.First().ConsumeResult!.IsPartitionEOF.Should().BeTrue();
         Assert.Throws<OperationCanceledException>(() => stream.First());
@@ -36,7 +36,7 @@ public class BlockingTests
             [0] = new byte[0][]
         })).ToArray();
 
-        var stream = KafkaEnumerable.Multiple(consumers, cancellationToken: cts.Token);
+        var stream = KafkaEnumerables.Multiple(consumers, cancellationToken: cts.Token);
 
         stream.Take(consumers.Length).All(m => m.ConsumeResult!.IsPartitionEOF).Should().BeTrue();
         Assert.Throws<OperationCanceledException>(() => stream.First());
@@ -51,7 +51,7 @@ public class BlockingTests
             [0] = new byte[0][]
         })).ToArray();
 
-        var stream = KafkaEnumerable.Priority(consumers, cancellationToken: cts.Token);
+        var stream = KafkaEnumerables.Priority(consumers, cancellationToken: cts.Token);
 
         stream.Take(consumers.Length).All(m => m.ConsumeResult!.IsPartitionEOF).Should().BeTrue();
         Assert.Throws<OperationCanceledException>(() => stream.First());
@@ -65,7 +65,7 @@ public class BlockingTests
         {
             [0] = Enumerable.Repeat(0, 100).Select(_ => Array.Empty<byte>()).ToArray()
         });
-        var stream = KafkaEnumerable.Single(consumer, cancellationToken: cts.Token);
+        var stream = KafkaEnumerables.Single(consumer, cancellationToken: cts.Token);
 
         stream.Take(50).All(m => m.HasData).Should().BeTrue();
         stream.Take(50).All(m => m.HasData).Should().BeTrue();
@@ -80,7 +80,7 @@ public class BlockingTests
         {
             [0] = Enumerable.Repeat(0, 100).Select(_ => Array.Empty<byte>()).ToArray()
         })).ToArray();
-        var stream = KafkaEnumerable.Multiple(consumers, cancellationToken: cts.Token);
+        var stream = KafkaEnumerables.Multiple(consumers, cancellationToken: cts.Token);
 
         stream.Take(100).All(m => m.HasData).Should().BeTrue();
         stream.Take(100).All(m => m.HasData).Should().BeTrue();
@@ -96,7 +96,7 @@ public class BlockingTests
         {
             [0] = Enumerable.Repeat(0, 100).Select(_ => Array.Empty<byte>()).ToArray()
         })).ToArray();
-        var stream = KafkaEnumerable.Priority(consumers, cancellationToken: cts.Token);
+        var stream = KafkaEnumerables.Priority(consumers, cancellationToken: cts.Token);
 
         stream.Take(100).All(m => m.HasData).Should().BeTrue();
         stream.First().ConsumeResult!.IsPartitionEOF.Should().BeTrue();

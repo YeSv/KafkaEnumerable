@@ -25,7 +25,7 @@ public class ConsumeTimeoutTests
         }, sleep: true);
 
 
-        var stream = KafkaEnumerable.Single(consumer, consumeTimeout: Timeout.Divide(2), returnNulls: true, cancellationToken: cts.Token);
+        var stream = KafkaEnumerables.Single(consumer, consumeTimeout: Timeout.Divide(2), returnNulls: true, cancellationToken: cts.Token);
 
         stream.First().ConsumeResult!.IsPartitionEOF.Should().BeTrue();
 
@@ -46,7 +46,7 @@ public class ConsumeTimeoutTests
         }, sleep: true),1).ToArray();
 
 
-        var stream = KafkaEnumerable.Multiple(consumers, consumeTimeout: Timeout.Divide(2), returnNulls: true, cancellationToken: cts.Token);
+        var stream = KafkaEnumerables.Multiple(consumers, consumeTimeout: Timeout.Divide(2), returnNulls: true, cancellationToken: cts.Token);
 
         stream.First().ConsumeResult!.IsPartitionEOF.Should().BeTrue();
 
@@ -67,7 +67,7 @@ public class ConsumeTimeoutTests
         }, sleep: true), 1).ToArray();
 
 
-        var stream = KafkaEnumerable.Priority(consumers, consumeTimeout: Timeout.Divide(2), returnNulls: true, cancellationToken: cts.Token);
+        var stream = KafkaEnumerables.Priority(consumers, consumeTimeout: Timeout.Divide(2), returnNulls: true, cancellationToken: cts.Token);
 
         stream.First().ConsumeResult!.IsPartitionEOF.Should().BeTrue();
 

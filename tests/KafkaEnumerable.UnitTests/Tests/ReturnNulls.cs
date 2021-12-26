@@ -21,7 +21,7 @@ public class ReturnNullsTests
             [0] = new byte[0][]
         });
 
-        var stream = KafkaEnumerable.Single(consumer, returnNulls: true, cancellationToken: cts.Token);
+        var stream = KafkaEnumerables.Single(consumer, returnNulls: true, cancellationToken: cts.Token);
 
         stream.First().ConsumeResult!.IsPartitionEOF.Should().BeTrue();
         stream.Take(100).All(m => !m.HasData).Should().BeTrue();
@@ -36,7 +36,7 @@ public class ReturnNullsTests
             [0] = new byte[0][]
         })).ToArray();
 
-        var stream = KafkaEnumerable.Multiple(consumers, returnNulls: true, cancellationToken: cts.Token);
+        var stream = KafkaEnumerables.Multiple(consumers, returnNulls: true, cancellationToken: cts.Token);
 
         stream.Take(consumers.Length * 2).Where((e, i) => i % 2 == 0).All(m => m.ConsumeResult!.IsPartitionEOF).Should().BeTrue();
         stream.Take(100).All(m => !m.HasData).Should().BeTrue();
@@ -51,7 +51,7 @@ public class ReturnNullsTests
             [0] = new byte[0][]
         })).ToArray();
 
-        var stream = KafkaEnumerable.Priority(consumers, returnNulls: true, cancellationToken: cts.Token);
+        var stream = KafkaEnumerables.Priority(consumers, returnNulls: true, cancellationToken: cts.Token);
 
         stream.Take(consumers.Length * 2).Where((e, i) => i % 2 == 0).All(m => m.ConsumeResult!.IsPartitionEOF).Should().BeTrue();
         stream.Take(100).All(m => !m.HasData).Should().BeTrue();
@@ -66,7 +66,7 @@ public class ReturnNullsTests
             [0] = Enumerable.Range(0, 100).Select(_ => Array.Empty<byte>()).ToArray()
         });
 
-        var stream = KafkaEnumerable.Single(consumer, returnNulls: true, cancellationToken: cts.Token);
+        var stream = KafkaEnumerables.Single(consumer, returnNulls: true, cancellationToken: cts.Token);
         
         stream.Take(100).All(m => m.HasData).Should().BeTrue();
         stream.Take(1).All(m => m.HasData && m.ConsumeResult!.IsPartitionEOF).Should().BeTrue();
@@ -82,7 +82,7 @@ public class ReturnNullsTests
             [0] = Enumerable.Range(0, 100).Select(_ => Array.Empty<byte>()).ToArray()
         })).ToArray();
 
-        var stream = KafkaEnumerable.Multiple(consumers, returnNulls: true, cancellationToken: cts.Token);
+        var stream = KafkaEnumerables.Multiple(consumers, returnNulls: true, cancellationToken: cts.Token);
 
         _ = stream.Take(306).ToArray();
         stream.Take(100).Where(m => m.HasData).ToArray().Should().BeEmpty();
@@ -97,7 +97,7 @@ public class ReturnNullsTests
             [0] = Enumerable.Range(0, 20).Select(_ => Array.Empty<byte>()).ToArray()
         })).ToArray();
 
-        var stream = KafkaEnumerable.Priority(consumers, returnNulls: true, cancellationToken: cts.Token);
+        var stream = KafkaEnumerables.Priority(consumers, returnNulls: true, cancellationToken: cts.Token);
 
         var firstBatch = stream.Take(22).ToArray();
         var secondBatch = stream.Take(21).ToArray();
