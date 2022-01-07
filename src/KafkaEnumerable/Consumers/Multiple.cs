@@ -59,8 +59,23 @@ internal static class Consumer
         var (consumer, moveNext, nextFlush, currentThresholds) = (0, false, DateTime.UtcNow.Add(options.FlushInterval), options.Thresholds.ToArray());
         while (true)
         {
-            if (DateTime.UtcNow > nextFlush) goto Flush; // If flush interval is reached - flush
-            if (moveNext) goto MoveToNext; // Check if we need to select another consumer
+            if (DateTime.UtcNow > nextFlush) // Flush data if required
+            {
+                nextFlush = DateTime.Now.Add(options.FlushInterval); // Update flush deadline
+                for (var i = consumers.Length - 1; i >= 0; i--) // Consume from all consumers to handle repartitioning/(un)assign events
+                {
+                    var flushMessage = Consume(consumers[i], options.ConsumeTimeout, true, token);
+                    if (flushMessage.HasData) yield return flushMessage; // Yield if received meaningful data
+                }
+
+                continue;
+            }
+
+            if (moveNext) // Update consumer index if required
+            {
+                moveNext = false;
+                if (++consumer >= consumers.Length) consumer = 0;
+            }
 
             var message = Consume(consumers[consumer], options.ConsumeTimeout, false, token);
             if (--currentThresholds[consumer] <= 0 || !message.HasData) // Reached available threshold or no meaningful data - update thresholds and try to move to next consumer
@@ -68,25 +83,8 @@ internal static class Consumer
                 moveNext = true;
                 currentThresholds[consumer] = options.Thresholds[consumer];
             }
-            if (options.ReturnNulls || message.HasData) yield return message; // Yield if returnNulls is enabled or if received meaningful data
 
-            continue;
-
-
-        MoveToNext:
-            moveNext = false;
-            if (++consumer >= consumers.Length) consumer = 0;
-
-            continue;
-
-
-        Flush:
-            nextFlush = DateTime.Now.Add(options.FlushInterval); // Update flush deadline
-            for (var i = consumers.Length - 1; i >= 0; i--) // Consume from all consumers to handle repartitioning/(un)assign events
-            {
-                var flushMessage = Consume(consumers[i], options.ConsumeTimeout, true, token);
-                if (flushMessage.HasData) yield return flushMessage; // Yield if received meaningful data
-            }
+            if (options.ReturnNulls || message.HasData) yield return message; // Yield if returnNulls is enabled or if received meaningful data            
         }
     }
 

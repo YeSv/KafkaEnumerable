@@ -61,8 +61,35 @@ internal static class Consumer
         var (priority, checkPriority, nextFlush, currentThresholds) = (0, false, DateTime.UtcNow.Add(options.FlushInterval), options.Thresholds.ToArray());
         while (true)
         {
-            if (DateTime.UtcNow > nextFlush) goto Flush; // We need to flush due to timeout
-            if (checkPriority) goto UpdatePriority; // If we need to check priorities - jump
+            if (DateTime.UtcNow > nextFlush) // Try to flush if required
+            {
+                nextFlush = DateTime.UtcNow.Add(options.FlushInterval); // Update flush deadline
+                for (var i = consumers.Length - 1; i >= 0; i--) // Consume in reverse order to handle repartitioning/(un)assign events
+                {
+                    var flushMessage = Consume(consumers[i], options.ConsumeTimeout, true, i, token);
+                    if (flushMessage.HasData) yield return flushMessage; // Yield message only if it has meaningful data
+                }
+
+                continue;
+            }
+
+            if (checkPriority) // Update priority if required
+            {
+                checkPriority = false;
+                if (++priority >= consumers.Length) priority = 0;
+                for (var i = 0; i < priority; i++) // Check priorities before chosen one
+                {
+                    var prevMessage = Consume(consumers[i], options.ConsumeTimeout, false, i, token);
+                    if (prevMessage.HasData) // Just check here if previous priority has data (returnNulls is ignored here)
+                    {
+                        priority = i; // We can jump to previous priority because consumer returned meaningful data
+                        yield return prevMessage;
+                        break;
+                    }
+                }
+
+                continue;
+            }
 
             var message = Consume(consumers[priority], options.ConsumeTimeout, false, priority, token);
             if (currentThresholds[priority] != Defaults.Infinity) currentThresholds[priority]--; // Update current threshold
@@ -71,32 +98,8 @@ internal static class Consumer
                 checkPriority = true;
                 currentThresholds[priority] = options.Thresholds[priority];
             }
+
             if (options.ReturnNulls || message.HasData) yield return message; // Yield message only if it has meaningful data or returnNulls is enabled
-            continue;
-
-
-        UpdatePriority:
-            checkPriority = false;
-            if (++priority >= consumers.Length) priority = 0;
-            for (var i = 0; i < priority; i++) // Check priorities before chosen one
-            {
-                var prevMessage = Consume(consumers[i], options.ConsumeTimeout, false, i, token);
-                if (prevMessage.HasData) // Just check here if previous priority has data (returnNulls is ignored here)
-                {
-                    priority = i; // We can jump to previous priority because consumer returned meaningful data
-                    yield return prevMessage; 
-                    break;
-                }
-            }
-            continue;
-
-        Flush:
-            nextFlush = DateTime.UtcNow.Add(options.FlushInterval); // Update flush deadline
-            for (var i = consumers.Length - 1; i >= 0; i--) // Consume in reverse order to handle repartitioning/(un)assign events
-            {
-                var flushMessage = Consume(consumers[i], options.ConsumeTimeout, true, i, token);
-                if (flushMessage.HasData) yield return flushMessage; // Yield message only if it has meaningful data
-            }
         }
     }
 
