@@ -104,7 +104,7 @@ Let's dive deeper in next sections dedicated for each consumer stream directly.
 
 1. `returnNulls` (`bool`, false by default) - set as `true` so `IEnumerable` would return nulls from Kafka consumer as `ConsumeResult<TKey, TValue>`. C# kafka client returns nulls from `.Consume()` method if there is no messages in the internal in-memory queue. It's a very important setting explained deeply later.
 
-2. `consumeTimeout` (`TimeSpan`, 1 millisecond by default) - used in `.Consume(int milliseconds)` API to poll message from Kafka. Actually 1 millisecond is a good choice by default but you can override it if you want (but better to leave it as is).
+2. `consumeTimeout` (`TimeSpan`, 0 milliseconds by default) - used in `.Consume(int milliseconds)` API to poll message from Kafka. Actually 1 millisecond is a good choice by default but you can override it if you want (but better to leave it as is).
 
 3. `cancellationToken` (`CancellationToken`) - used to `stop` an `Enumerable` instance :D (explained later)
 
@@ -289,7 +289,7 @@ Available options:
 
 1. `returnNulls` (`bool`, false by default) - set as `true` so `IEnumerable` would return nulls from Kafka consumer as `ConsumeResult<TKey, TValue>`. C# kafka client returns nulls from `.Consume()` api if there is no messages in internal in-memory queue (see [Single](#3-single) section).
 
-2. `consumeTimeout` (`TimeSpan`, 1 millisecond by default) - used in `.Consume(int milliseconds)` API to poll message from Kafka. Actually 1 millisecond is a good choice by default but you can override it if you want.
+2. `consumeTimeout` (`TimeSpan`, 0 milliseconds by default) - used in `.Consume(int milliseconds)` API to poll message from Kafka. Actually 1 millisecond is a good choice by default but you can override it if you want.
 
 3. `cancellationToken` (`CancellationToken`) - well, it does not require any explanation. It is used to `stop` an `Enumerable` instance :D (see [Single](#3-single) section)
 
